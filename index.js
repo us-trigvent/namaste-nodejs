@@ -3,11 +3,15 @@ const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const User = require("./models/user");
-app.use(express.json())
+app.use(express.json());
 app.post("/register", async (req, res) => {
-  const newUser = new User(req.body);
-  await newUser.save();
-  res.send("User registered successfully");
+  try {
+    const newUser = new User(req.body);
+    await newUser.save();
+    res.send("User registered successfully");
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
 });
 connectDB()
   .then(() => {
@@ -20,6 +24,25 @@ connectDB()
     console.log("Database connection failed", err);
   });
 
+app.delete("/delete-user", async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    await User.findByIdAndDelete(userId);
+    res.send("User deleted successfully");
+  } catch (err) {
+    res.status(400).send("Error deleting user");
+  }
+});
+app.patch("/update-user", async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const updatedData = req.body;
+    await User.findByIdAndUpdate(userId, updatedData);
+    res.send("User updated successfully");
+  } catch (err) {
+    res.status(400).send("Error updating user");
+  }
+});
 // app.use("/admin", adminAuth);
 // app.get("/admin/getUser", (req, res) => {
 //     res.status(200).send("Authorized frm 1");
