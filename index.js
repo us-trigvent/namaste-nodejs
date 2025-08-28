@@ -37,11 +37,29 @@ app.patch("/update-user", async (req, res) => {
   try {
     const userId = req.body.userId;
     const updatedData = req.body;
-    await User.findByIdAndUpdate(userId, updatedData);
+    const ALLOWED_UPDATES = [
+      "userId",
+      "photo_url",
+      "gender",
+      "age",
+      "about",
+      "skills",
+      "lastName",
+    ];
+    const IS_UPDATES_ALLOWED = Object.keys(updatedData).every((key) =>
+      ALLOWED_UPDATES.includes(key)
+    );
+    if (!IS_UPDATES_ALLOWED) {
+      throw new Error("Updates not allowed");
+    }
+    if (updatedData.skills.length > 5) {
+      throw new Error("Skills cannot be more than 5");
+    }
+    await User.findByIdAndUpdate(userId, updatedData, { runValidators: true });
     res.send("User updated successfully");
   } catch (err) {
-    res.status(400).send("Error updating user");
-  }
+  res.status(400).send(err.message);
+}
 });
 // app.use("/admin", adminAuth);
 // app.get("/admin/getUser", (req, res) => {
