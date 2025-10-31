@@ -1,5 +1,4 @@
 const express = require("express");
-// const {adminAuth,userAuth} = require("./middleware/auth");
 const connectDB = require("./config/database");
 const app = express();
 app.use(express.json());
@@ -7,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("./models/user");
 const cookieParser = require("cookie-parser");
+const { userAuth } = require("./middleware/auth");
 app.use(cookieParser());
 connectDB()
   .then(() => {
@@ -39,11 +39,11 @@ app.post("/user/login", async (req, res) => {
     if (!user) {
       return res.status(400).send("Invalid login credentials");
     }
-    const isMatch = await bcrypt.compare(password, user?.password);
+    const isMatch = user.validatePassword(password);
     if (!isMatch) {
       return res.status(400).send("Invalid login credentials");
     }
-    const token = await jwt.sign({ _id: user?._id }, "UMESHSECRETKEY");
+    const token = await user.getJWT();
     res.cookie("token", token);
     res.send("User logged in successfully");
   } catch (err) {
@@ -92,17 +92,9 @@ app.patch("/update-user", async (req, res) => {
     res.status(400).send(err.message);
   }
 });
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const cookies = req.cookies;
-    const { token } = cookies;
-    if (!token) {
-      return res.status(401).send("Unauthorized: No token provided");
-    }
-    const decodedMessage = jwt.verify(token, "UMESHSECRETKEY");
-    const { _id } = decodedMessage;
-    console.log(decodedMessage);
-    const user = await User.findById(_id);
+    const user = req.user;
     res.json(user);
   } catch (err) {
     res.status(400).send("Error fetching user profile");
