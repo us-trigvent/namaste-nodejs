@@ -6,10 +6,12 @@ app.use(express.json());
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const cookieParser = require("cookie-parser");
+const requestRouter = require("./routes/request");
 
 app.use(cookieParser());
 app.use("/", authRouter);
 app.use("/", profileRouter);
+app.use("/", requestRouter);
 connectDB()
   .then(() => {
     console.log("Database connected");
