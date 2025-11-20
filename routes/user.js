@@ -27,10 +27,17 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
                 { fromUserId: loggedInUserId, status: "accepted" },
                 { toUserId: loggedInUserId, status: "accepted" }
             ]
-        }).populate('fromUserId', SAFE_DATA_FIELDS);
+        }).populate('fromUserId', SAFE_DATA_FIELDS).populate('toUserId', SAFE_DATA_FIELDS);
+        const data = connectionRequests.map(request => {
+            if (request.fromUserId._id.toString() === loggedInUserId.toString()) {
+                return request.toUserId;
+            }
+            return request.fromUserId;
+        });
+
         res.json({
             message: "Connections retrieved successfully",
-            data: connectionRequests
+            data: data
         });
     } catch (err) {
         res.status(400).send(err.message);
