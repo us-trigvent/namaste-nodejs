@@ -54,13 +54,12 @@ requestRouter.post("/request/review/:status/:requestId", userAuth, async (req, r
             return res.status(400).send("Invalid status value");
         }
 
-        const connectionRequestBool = await ConnectionRequest.findOne({
+        const connectionRequest = await ConnectionRequest.findOne({
             _id: requestId,
             toUserId: loggedInUserId._id,
             status: "interested"
         });
-        console.log(connectionRequestBool, requestId, loggedInUserId._id);
-        if (!connectionRequestBool) {
+        if (!connectionRequest) {
             return res.status(400).send({ message: "No pending connection request found" });
         }
         connectionRequest.status = status;
