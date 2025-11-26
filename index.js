@@ -7,8 +7,13 @@ const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const cookieParser = require("cookie-parser");
 const requestRouter = require("./routes/request");
+const cors = require("cors");
 const userRouter = require("./routes/user");
-
+app.use(cors({
+  origin: "http://localhost:5173", // your React app origin
+  methods: "GET,POST,PUT,DELETE",
+  credentials: true
+}));
 app.use(cookieParser());
 app.use("/", authRouter);
 app.use("/", profileRouter);

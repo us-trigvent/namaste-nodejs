@@ -36,7 +36,10 @@ authRouter.post("/user/login", async (req, res) => {
         }
         const token = await user.getJWT();
         res.cookie("token", token);
-        res.send("User logged in successfully");
+        res.send({
+            message: "User logged in successfully",
+            user: user,
+        });
     } catch (err) {
         console.log(err);
         res.status(400).send(err.message);
